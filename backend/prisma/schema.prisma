@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id       String   @id @default(cuid())
+  email    String   @unique
+  hash     String
+  role     String   @default("user")
+  attempts Attempt[]
+  gaps     GapProfile[]
+  practices PracticeItem[]
+}
+
+model Bank {
+  id           String     @id @default(cuid())
+  name         String
+  apiEndpoint  String?
+  authType     String?
+  questions    Question[]
+}
+
+model Question {
+  id             String   @id @default(cuid())
+  bankId         String
+  bank           Bank     @relation(fields: [bankId], references: [id], onDelete: Cascade)
+  text           String
+  answer         String?
+  solutionSteps  String?  @default("[]")
+  tags           String?  @default("[]")
+  difficulty     String?
+  attempts       Attempt[]
+}
+
+model Attempt {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId    String
+  question      Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  userAnswer    String?
+  correct       Boolean?
+  timestamp     String?
+  feedback      String?
+}
+
+model GapProfile {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic         String
+  masteryScore  Float    @default(0)
+  lastPracticed String?
+}
+
+model PracticeItem {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic            String
+  prompt           String
+  expectedSolution String
+}
