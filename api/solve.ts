@@ -9,8 +9,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const apiKey = process.env.OPENAI_API_KEY
 
-  try {
-    if (apiKey) {
+  if (apiKey) {
+    try {
       const openai = new OpenAI({ apiKey })
       const response = await openai.completions.create({
         model: 'gpt-3.5-turbo-instruct',
@@ -21,14 +21,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const result = response.choices?.[0]?.text?.trim() ?? ''
       const steps = result.split('\n').filter(l => l.trim())
       return res.json({ answer: result, steps })
+    } catch (e) {
+      console.error('OpenAI error:', e)
     }
-  } catch (e) {
-    // Fall through to mock
   }
 
   // Mock fallback
   return res.json({
     answer: `Mock answer for: ${text}`,
-    steps: ['Understand the problem', 'Identify knowns and unknowns', 'Apply a standard method', 'Conclude with final answer']
+    steps: [
+      'Understand the problem',
+      'Identify knowns and unknowns', 
+      'Apply a standard method',
+      'Conclude with final answer'
+    ]
   })
 }
